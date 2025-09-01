@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClashLink - 节点转换工具</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="main-page">
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🔗 ClashLink</h1>
+                <div class="user-info">
+                    <span id="username">用户</span>
+                    <button id="logoutBtn" class="logout-btn">退出登录</button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <div class="converter-section">
+                <h2>节点转换</h2>
+                <p class="section-desc">粘贴您的 VLESS/VMess 链接，生成 Clash 订阅配置</p>
+                
+                <!-- 输入区域 -->
+                <div class="input-section">
+                    <label for="nodeLinks">节点链接</label>
+                    <textarea id="nodeLinks" placeholder="请粘贴 VLESS/VMess 链接，每行一个&#10;&#10;支持格式：&#10;vmess://eyJ2IjoiMiIsInBzIjoi...&#10;vless://uuid@server:port?type=ws&security=tls&..."></textarea>
+                    <div class="input-stats">
+                        <span id="linkCount">0 个链接</span>
+                    </div>
+                </div>
+                
+                <!-- 配置选项 -->
+                <div class="options-section">
+                    <h3>转换选项</h3>
+                    <div class="options-grid">
+                        <div class="option-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="checkNodes" checked>
+                                <span class="checkmark"></span>
+                                检测节点连通性
+                            </label>
+                            <small>测试节点是否可用（可能需要较长时间）</small>
+                        </div>
+                        <div class="option-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="onlyOnline">
+                                <span class="checkmark"></span>
+                                仅包含在线节点
+                            </label>
+                            <small>只在配置中包含测试通过的节点</small>
+                        </div>
+                        <div class="option-item">
+                            <label for="configName">配置文件名称</label>
+                            <input type="text" id="configName" placeholder="留空自动生成">
+                            <small>生成的 YAML 配置文件名称</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="action-section">
+                    <button id="generateBtn" class="generate-btn">
+                        <span class="btn-text">🚀 生成订阅</span>
+                        <span class="btn-loading">
+                            <div class="loading-spinner"></div>
+                            正在处理...
+                        </span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 结果区域 -->
+            <div class="result-section" id="resultSection" style="display: none;">
+                <h2>转换结果</h2>
+                
+                <!-- 基本信息 -->
+                <div class="result-info">
+                    <div class="info-item">
+                        <label>订阅链接：</label>
+                        <div class="url-container">
+                            <input type="text" id="subscriptionUrl" readonly>
+                            <button id="copyUrlBtn" class="copy-btn">复制</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 节点状态 -->
+                <div class="node-status" id="nodeStatus" style="display: none;">
+                    <h3>节点检测结果</h3>
+                    <div class="status-summary" id="statusSummary"></div>
+                    <div class="status-list" id="statusList"></div>
+                </div>
+                
+                <!-- 配置预览 -->
+                <div class="config-preview">
+                    <h3>配置预览</h3>
+                    <div class="config-actions">
+                        <button id="toggleConfig" class="toggle-btn">显示配置</button>
+                        <button id="downloadConfig" class="download-btn">下载配置</button>
+                    </div>
+                    <pre id="configContent" class="config-content" style="display: none;"></pre>
+                </div>
+            </div>
+        </main>
+        
+        <!-- 使用说明 -->
+        <section class="help-section">
+            <details>
+                <summary>使用说明</summary>
+                <div class="help-content">
+                    <h4>支持的协议：</h4>
+                    <ul>
+                        <li><strong>VMess：</strong>vmess://base64编码的JSON配置</li>
+                        <li><strong>VLESS：</strong>vless://uuid@server:port?参数格式</li>
+                    </ul>
+                    
+                    <h4>使用步骤：</h4>
+                    <ol>
+                        <li>将 VLESS/VMess 链接粘贴到文本框中，每行一个</li>
+                        <li>选择转换选项（是否检测连通性等）</li>
+                        <li>点击"生成订阅"按钮</li>
+                        <li>复制生成的订阅链接到 Clash 客户端使用</li>
+                    </ol>
+                    
+                    <h4>注意事项：</h4>
+                    <ul>
+                        <li>节点检测功能会增加处理时间，但可以过滤无效节点</li>
+                        <li>生成的配置文件会保存在服务器上，请定期清理</li>
+                        <li>订阅链接可以直接在 Clash 客户端中使用</li>
+                    </ul>
+                </div>
+            </details>
+        </section>
+    </div>
+    
+    <!-- 消息提示 -->
+    <div id="message" class="message-toast"></div>
+    
+    <script src="/static/script.js"></script>
+</body>
+</html>
+

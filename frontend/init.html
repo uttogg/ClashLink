@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClashLink - 系统初始化</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="auth-page init-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>🔗 ClashLink</h1>
+                <p>VLESS/VMess 到 Clash 订阅转换工具</p>
+                <div class="init-welcome">
+                    <h2>🎉 欢迎使用 ClashLink</h2>
+                    <p>首次使用需要设置管理员账号</p>
+                </div>
+            </div>
+            
+            <!-- 初始化表单 -->
+            <form id="initForm" class="auth-form active">
+                <div class="form-group">
+                    <label for="adminUsername">管理员用户名</label>
+                    <input type="text" id="adminUsername" name="adminUsername" required 
+                           placeholder="请输入管理员用户名（至少3位）" autocomplete="username">
+                    <small class="form-hint">管理员用户名至少需要3个字符</small>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">管理员密码</label>
+                    <input type="password" id="adminPassword" name="adminPassword" required 
+                           placeholder="请输入管理员密码（至少6位）" autocomplete="new-password">
+                    <small class="form-hint">密码至少需要6个字符</small>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required 
+                           placeholder="请再次输入密码" autocomplete="new-password">
+                </div>
+                <button type="submit" class="auth-btn init-btn">
+                    <span class="btn-text">初始化系统</span>
+                    <span class="btn-loading">
+                        <div class="loading-spinner"></div>
+                        正在初始化...
+                    </span>
+                </button>
+            </form>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="auth-footer">
+                <div class="init-info">
+                    <h4>⚠️ 重要提示：</h4>
+                    <ul>
+                        <li>管理员账号拥有系统的完全控制权</li>
+                        <li>请设置强密码并妥善保管</li>
+                        <li>初始化后将无法修改管理员信息</li>
+                        <li>管理员可以管理其他用户账号</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/init.js"></script>
+</body>
+</html>

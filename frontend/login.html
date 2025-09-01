@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClashLink - 用户认证</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>🔗 ClashLink</h1>
+                <p>VLESS/VMess 到 Clash 订阅转换工具</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-tab="login">登录</button>
+                <button class="tab-btn" data-tab="register">注册</button>
+            </div>
+            
+            <!-- 登录表单 -->
+            <form id="loginForm" class="auth-form active">
+                <div class="form-group">
+                    <label for="loginUsername">用户名</label>
+                    <input type="text" id="loginUsername" name="username" required 
+                           placeholder="请输入用户名" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password" id="loginPassword" name="password" required 
+                           placeholder="请输入密码" autocomplete="current-password">
+                </div>
+                <button type="submit" class="auth-btn">
+                    <span class="btn-text">登录</span>
+                    <span class="btn-loading">
+                        <div class="loading-spinner"></div>
+                        正在登录...
+                    </span>
+                </button>
+            </form>
+            
+            <!-- 注册表单 -->
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="registerUsername">用户名</label>
+                    <input type="text" id="registerUsername" name="username" required 
+                           placeholder="请输入用户名（至少3位）" autocomplete="username">
+                    <small class="form-hint">用户名至少需要3个字符</small>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <input type="password" id="registerPassword" name="password" required 
+                           placeholder="请输入密码（至少6位）" autocomplete="new-password">
+                    <small class="form-hint">密码至少需要6个字符</small>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required 
+                           placeholder="请再次输入密码" autocomplete="new-password">
+                </div>
+                <button type="submit" class="auth-btn">
+                    <span class="btn-text">注册</span>
+                    <span class="btn-loading">
+                        <div class="loading-spinner"></div>
+                        正在注册...
+                    </span>
+                </button>
+            </form>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="auth-footer">
+                <p>安全提示：请使用强密码保护您的账户</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/auth.js"></script>
+</body>
+</html>
+

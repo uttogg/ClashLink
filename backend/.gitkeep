@@ -1,0 +1,23 @@
+# .gitkeep - 后端代码目录
+# ==========================================
+# 
+# 此目录包含 ClashLink 的后端 Go 代码
+#
+# 主要文件：
+# - main.go: 服务器主程序和路由配置
+# - auth.go: 用户认证和 JWT 处理
+# - database.go: 数据库操作和连接
+# - middleware.go: JWT 认证中间件
+# - parser.go: VLESS/VMess 链接解析
+# - checker.go: 节点连通性检测
+# - generator.go: Clash 配置生成
+# - user.go: 用户数据模型定义
+#
+# 依赖管理：
+# - go.mod: Go 模块依赖定义
+# - go.sum: 依赖校验和文件
+#
+# 数据文件：
+# - data.db: SQLite 数据库文件（被 .gitignore 忽略）
+#
+# ==========================================
