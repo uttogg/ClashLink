@@ -84,7 +84,19 @@
 
 Docker 部署是最简单和可靠的方式，提供了完整的环境隔离和数据持久化。
 
-#### 快速开始
+#### ⚡ 超快速开始 (30秒部署)
+
+```bash
+# 一条命令启动 ClashLink
+mkdir clashlink && cd clashlink
+curl -O https://raw.githubusercontent.com/uttogg/ClashLink/main/docker-compose.yml
+docker-compose up -d
+
+# 访问应用
+echo "🎉 ClashLink 已启动: http://localhost:8080"
+```
+
+#### 完整部署步骤
 
 1. **安装 Docker**
    ```bash
@@ -96,11 +108,20 @@ Docker 部署是最简单和可靠的方式，提供了完整的环境隔离和�
    newgrp docker
    ```
 
-2. **构建镜像**
+2. **下载配置文件**
    ```bash
-   # 构建 ClashLink Docker 镜像
-   chmod +x docker-build.sh
-   ./docker-build.sh v1.0.0
+   # 创建项目目录
+   mkdir clashlink && cd clashlink
+   
+   # 下载 Docker Compose 配置
+   curl -O https://raw.githubusercontent.com/uttogg/ClashLink/main/docker-compose.yml
+   
+   # 下载环境配置模板 (可选)
+   curl -O https://raw.githubusercontent.com/uttogg/ClashLink/main/env.example
+   cp env.example .env
+   
+   # 编辑配置 (可选)
+   nano .env  # 修改 JWT_SECRET 等配置
    ```
 
 3. **启动服务**
@@ -108,9 +129,13 @@ Docker 部署是最简单和可靠的方式，提供了完整的环境隔离和�
    # 使用 Docker Compose (推荐)
    docker-compose up -d
    
-   # 或使用运行脚本
-   chmod +x docker-run.sh
-   ./docker-run.sh start
+   # 或直接运行 Docker 容器
+   docker run -d --name clashlink-app \
+     -p 8080:8080 \
+     -v $(pwd)/data/database:/app/backend \
+     -v $(pwd)/data/subscriptions:/app/subscriptions \
+     -e JWT_SECRET=your-secure-secret \
+     uttogg/clashlink:latest
    ```
 
 4. **访问应用**
@@ -120,11 +145,11 @@ Docker 部署是最简单和可靠的方式，提供了完整的环境隔离和�
 #### Docker Compose 部署
 
 ```yaml
-# 创建 docker-compose.yml 或使用项目自带的配置
+# docker-compose.yml 配置示例
 version: '3.8'
 services:
   clashlink:
-    build: .
+    image: uttogg/clashlink:latest
     container_name: clashlink-app
     restart: unless-stopped
     ports:
@@ -135,7 +160,7 @@ services:
       - ./data/logs:/app/logs
     environment:
       - TZ=Asia/Shanghai
-      - JWT_SECRET=your-secure-jwt-secret
+      - JWT_SECRET=${JWT_SECRET:-change-this-secret-in-production}
 ```
 
 ```bash
@@ -158,6 +183,9 @@ docker-compose down
 # 创建数据目录
 mkdir -p data/{database,subscriptions,logs}
 
+# 拉取最新镜像
+docker pull uttogg/clashlink:latest
+
 # 运行容器
 docker run -d \
   --name clashlink-app \
@@ -168,7 +196,7 @@ docker run -d \
   -v $(pwd)/data/logs:/app/logs \
   -e TZ=Asia/Shanghai \
   -e JWT_SECRET=your-secure-jwt-secret \
-  clashlink:latest
+  uttogg/clashlink:latest
 ```
 
 #### Docker 管理命令
