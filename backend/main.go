@@ -33,7 +33,12 @@ func main() {
 	}
 
 	// 创建订阅目录
-	if err := os.MkdirAll("../subscriptions", 0755); err != nil {
+	subscriptionDir := "../subscriptions"
+	// 在Docker环境中使用绝对路径
+	if _, err := os.Stat("/app"); err == nil {
+		subscriptionDir = "/app/subscriptions"
+	}
+	if err := os.MkdirAll(subscriptionDir, 0755); err != nil {
 		log.Fatal("创建订阅目录失败:", err)
 	}
 
@@ -41,16 +46,30 @@ func main() {
 	mux := http.NewServeMux()
 
 	// 静态文件服务
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../frontend/"))))
-	mux.Handle("/subscriptions/", http.StripPrefix("/subscriptions/", http.FileServer(http.Dir("../subscriptions/"))))
+	frontendDir := "../frontend/"
+	// 在Docker环境中使用绝对路径
+	if _, err := os.Stat("/app"); err == nil {
+		frontendDir = "/app/frontend/"
+		subscriptionDir = "/app/subscriptions/"
+	}
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(frontendDir))))
+	mux.Handle("/subscriptions/", http.StripPrefix("/subscriptions/", http.FileServer(http.Dir(subscriptionDir))))
 
 	// 公开路由（无需认证）
 	mux.HandleFunc("/", RootHandler)
 	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "../frontend/login.html")
+		loginPath := "../frontend/login.html"
+		if _, err := os.Stat("/app"); err == nil {
+			loginPath = "/app/frontend/login.html"
+		}
+		http.ServeFile(w, r, loginPath)
 	})
 	mux.HandleFunc("/init", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "../frontend/init.html")
+		initPath := "../frontend/init.html"
+		if _, err := os.Stat("/app"); err == nil {
+			initPath = "/app/frontend/init.html"
+		}
+		http.ServeFile(w, r, initPath)
 	})
 	mux.HandleFunc("/api/init", InitSystemHandler)
 	mux.HandleFunc("/api/register", RegisterHandler)
@@ -60,7 +79,11 @@ func main() {
 
 	// 保护路由（需要JWT认证）
 	mux.Handle("/app", JWTMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "../frontend/index.html")
+		indexPath := "../frontend/index.html"
+		if _, err := os.Stat("/app"); err == nil {
+			indexPath = "/app/frontend/index.html"
+		}
+		http.ServeFile(w, r, indexPath)
 	})))
 	mux.Handle("/api/generate", JWTMiddleware(http.HandlerFunc(GenerateSubscriptionHandler)))
 

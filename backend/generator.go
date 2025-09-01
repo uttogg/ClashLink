@@ -108,7 +108,12 @@ func GenerateSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 保存配置文件
 	filename := fmt.Sprintf("%s.yaml", configName)
-	filepath := filepath.Join("../subscriptions", filename)
+	subscriptionDir := "../subscriptions"
+	// 在Docker环境中使用绝对路径
+	if _, err := os.Stat("/app"); err == nil {
+		subscriptionDir = "/app/subscriptions"
+	}
+	filepath := filepath.Join(subscriptionDir, filename)
 
 	if err := os.WriteFile(filepath, []byte(clashConfig), 0644); err != nil {
 		response.Success = false
