@@ -1170,3 +1170,324 @@ body::after {
     background: rgba(255, 140, 66, 0.3);
     color: white;
 }
+
+/* 更新通知样式 */
+.update-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
+    padding: 1rem 1.5rem;
+    max-width: 400px;
+    z-index: 9999;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: updatePulse 2s ease-in-out infinite alternate;
+}
+
+.update-notification.slide-in {
+    transform: translateX(0);
+}
+
+@keyframes updatePulse {
+    0% { box-shadow: var(--glass-shadow); }
+    100% { box-shadow: var(--glass-shadow), 0 0 20px rgba(255, 140, 66, 0.3); }
+}
+
+.update-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.update-icon {
+    font-size: 1.5rem;
+    animation: bounce 1s ease-in-out infinite alternate;
+}
+
+@keyframes bounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-5px); }
+}
+
+.update-text {
+    flex: 1;
+}
+
+.update-title {
+    font-weight: 600;
+    color: var(--text-bright);
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.update-version {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.update-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.update-btn {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.update-btn.primary {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 2px 8px rgba(76, 111, 255, 0.3);
+}
+
+.update-btn.primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 111, 255, 0.4);
+}
+
+.update-btn.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    border: 1px solid var(--glass-border);
+}
+
+.update-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.update-btn.close {
+    background: rgba(245, 101, 101, 0.15);
+    color: #F56565;
+    border: 1px solid rgba(245, 101, 101, 0.3);
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.update-btn.close:hover {
+    background: rgba(245, 101, 101, 0.25);
+}
+
+/* 更新模态框样式 */
+.update-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.update-modal-content {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: scaleIn 0.3s ease-out;
+}
+
+.update-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.update-modal-header h2 {
+    color: var(--text-bright);
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.update-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.update-modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.update-modal-body {
+    padding: 1.5rem;
+}
+
+.version-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+.version-current,
+.version-latest {
+    text-align: center;
+}
+
+.version-label {
+    display: block;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.25rem;
+}
+
+.version-number {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-bright);
+    font-family: 'SF Mono', 'Monaco', monospace;
+}
+
+.version-arrow {
+    font-size: 1.2rem;
+    color: var(--primary-orange);
+    font-weight: bold;
+}
+
+.release-notes {
+    margin-bottom: 1.5rem;
+}
+
+.release-notes h3 {
+    color: var(--text-bright);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.release-content {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.release-content h2,
+.release-content h3,
+.release-content h4 {
+    color: var(--text-bright);
+    margin: 0.5rem 0;
+}
+
+.release-content ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.release-content li {
+    margin-bottom: 0.25rem;
+}
+
+.release-date {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.update-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.update-modal-footer .update-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .update-notification {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        transform: translateY(100%);
+    }
+    
+    .update-notification.slide-in {
+        transform: translateY(0);
+    }
+    
+    .update-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .update-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .update-modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .version-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .version-arrow {
+        transform: rotate(90deg);
+    }
+    
+    .update-modal-footer {
+        flex-direction: column;
+    }
+    
+    .update-modal-footer .update-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

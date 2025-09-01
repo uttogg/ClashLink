@@ -55,6 +55,8 @@ func main() {
 	mux.HandleFunc("/api/init", InitSystemHandler)
 	mux.HandleFunc("/api/register", RegisterHandler)
 	mux.HandleFunc("/api/login", LoginHandler)
+	mux.HandleFunc("/api/version", GetCurrentVersionHandler)
+	mux.HandleFunc("/api/check-update", CheckVersionHandler)
 
 	// 保护路由（需要JWT认证）
 	mux.Handle("/app", JWTMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -65,4 +67,3 @@ func main() {
 	log.Println("服务器启动在端口 8080")
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
-

@@ -5,15 +5,9 @@
 # ===========================================
 
 # 编译后的二进制文件
-*.exe
-*.exe~
-*.dll
 *.so
-*.dylib
-clash-converter
-clash-converter.exe
+clashlink
 main
-main.exe
 
 # Go 测试文件
 *.test
@@ -76,18 +70,9 @@ log.*
 # 系统和编辑器文件
 # ===========================================
 
-# Windows 系统文件
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
 
-# macOS 系统文件
-.DS_Store
-.AppleDouble
-.LSOverride
-Icon
-._*
+
+
 
 # Linux 系统文件
 *~
@@ -234,6 +219,22 @@ debug.log
 # Git 备份文件
 *.orig
 *.rej
+
+# ===========================================
+# Docker 相关
+# ===========================================
+
+# Docker 数据目录
+data/
+docker-data/
+
+# Docker 环境配置
+.env
+.env.local
+.env.production
+
+# Docker 构建缓存
+.docker/
 
 # ===========================================
 # 自定义忽略
