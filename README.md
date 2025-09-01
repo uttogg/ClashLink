@@ -18,7 +18,7 @@
 - SQLite 数据库
 - JWT 认证
 - bcrypt 密码加密
-
+~
 ### 前端
 - 原生 HTML/CSS/JavaScript
 - 现代响应式设计
@@ -57,7 +57,7 @@
 
 2. **安装 Git**（可选，用于克隆项目）
 
-### 运行步骤
+### Windows 运行步骤
 
 1. **进入后端目录**
    ```bash
@@ -77,6 +77,292 @@
 4. **访问应用**
    - 打开浏览器访问：http://localhost:8080
    - 首次访问会看到登录/注册页面
+
+### Debian/Ubuntu 部署教程
+
+#### 📋 系统要求
+- Debian 10+ 或 Ubuntu 18.04+
+- 至少 512MB RAM
+- 至少 1GB 可用磁盘空间
+
+#### 🔧 步骤 1: 更新系统
+```bash
+# 更新软件包列表
+sudo apt update && sudo apt upgrade -y
+
+# 安装基本工具
+sudo apt install -y curl wget git unzip
+```
+
+#### 📦 步骤 2: 安装 Go 语言环境
+```bash
+# 下载 Go 1.21.5 (请检查最新版本)
+cd /tmp
+wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
+
+# 删除旧版本并安装新版本
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz
+
+# 设置环境变量
+echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+echo 'export GOPATH=$HOME/go' >> ~/.bashrc
+echo 'export GOBIN=$GOPATH/bin' >> ~/.bashrc
+
+# 重新加载环境变量
+source ~/.bashrc
+
+# 验证安装
+go version
+```
+
+#### 🚀 步骤 3: 部署应用
+```bash
+# 创建应用目录
+sudo mkdir -p /opt/clashlink
+sudo chown $USER:$USER /opt/clashlink
+cd /opt/clashlink
+
+# 克隆或上传项目文件
+# 方法1: 如果使用Git
+git clone <your-repo-url> .
+
+# 方法2: 手动上传文件
+# 将项目文件上传到 /opt/clashlink 目录
+
+# 设置正确的权限
+sudo chown -R $USER:$USER /opt/clashlink
+chmod +x backend/*.go
+```
+
+#### 📝 步骤 4: 配置应用
+```bash
+# 进入后端目录
+cd /opt/clashlink/backend
+
+# 下载 Go 依赖
+go mod tidy
+
+# 创建必要的目录
+mkdir -p /opt/clashlink/subscriptions
+
+# 设置目录权限
+chmod 755 /opt/clashlink/subscriptions
+```
+
+#### 🔥 步骤 5: 编译应用
+```bash
+# 编译应用
+cd /opt/clashlink/backend
+go build -o clashlink .
+
+# 验证编译结果
+./clashlink --help 2>/dev/null || echo "编译成功，准备启动"
+```
+
+#### 🛡️ 步骤 6: 创建系统服务
+```bash
+# 创建系统用户
+sudo useradd --system --no-create-home --shell /bin/false clashlink
+
+# 设置文件权限
+sudo chown -R clashlink:clashlink /opt/clashlink
+sudo chmod +x /opt/clashlink/backend/clashlink
+
+# 创建 systemd 服务文件
+sudo tee /etc/systemd/system/clashlink.service > /dev/null <<EOF
+[Unit]
+Description=ClashLink - VLESS/VMess to Clash Converter
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=clashlink
+Group=clashlink
+WorkingDirectory=/opt/clashlink/backend
+ExecStart=/opt/clashlink/backend/clashlink
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# 安全设置
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/clashlink
+
+# 环境变量
+Environment=GIN_MODE=release
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+#### 🚀 步骤 7: 启动服务
+```bash
+# 重新加载 systemd 配置
+sudo systemctl daemon-reload
+
+# 启动服务
+sudo systemctl start clashlink
+
+# 设置开机自启
+sudo systemctl enable clashlink
+
+# 检查服务状态
+sudo systemctl status clashlink
+
+# 查看服务日志
+sudo journalctl -u clashlink -f
+```
+
+#### 🌐 步骤 8: 配置防火墙 (可选)
+```bash
+# 如果使用 UFW 防火墙
+sudo ufw allow 8080/tcp
+sudo ufw reload
+
+# 如果使用 iptables
+sudo iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
+sudo iptables-save > /etc/iptables/rules.v4
+```
+
+#### 🔒 步骤 9: 配置 Nginx 反向代理 (推荐)
+```bash
+# 安装 Nginx
+sudo apt install -y nginx
+
+# 创建站点配置
+sudo tee /etc/nginx/sites-available/clashlink > /dev/null <<EOF
+server {
+    listen 80;
+    server_name your-domain.com;  # 替换为你的域名
+    
+    # 安全头
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    
+    # 限制请求大小
+    client_max_body_size 1M;
+    
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
+        
+        # 超时设置
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+    
+    # 静态文件缓存
+    location /static/ {
+        proxy_pass http://127.0.0.1:8080;
+        expires 7d;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # 订阅文件
+    location /subscriptions/ {
+        proxy_pass http://127.0.0.1:8080;
+        expires 1h;
+    }
+}
+EOF
+
+# 启用站点
+sudo ln -s /etc/nginx/sites-available/clashlink /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl enable nginx
+```
+
+#### 🔐 步骤 10: 配置 SSL (推荐)
+```bash
+# 安装 Certbot
+sudo apt install -y certbot python3-certbot-nginx
+
+# 获取 SSL 证书
+sudo certbot --nginx -d your-domain.com
+
+# 设置自动续期
+sudo crontab -e
+# 添加以下行：
+# 0 12 * * * /usr/bin/certbot renew --quiet
+```
+
+#### 📊 步骤 11: 监控和维护
+```bash
+# 查看服务状态
+sudo systemctl status clashlink
+
+# 查看实时日志
+sudo journalctl -u clashlink -f
+
+# 重启服务
+sudo systemctl restart clashlink
+
+# 查看端口占用
+sudo netstat -tlnp | grep :8080
+
+# 检查磁盘使用
+du -sh /opt/clashlink/subscriptions/
+
+# 清理旧的订阅文件（建议定期执行）
+find /opt/clashlink/subscriptions/ -name "*.yaml" -mtime +7 -delete
+```
+
+#### 🔧 故障排除
+
+**服务无法启动**
+```bash
+# 检查日志
+sudo journalctl -u clashlink --no-pager
+
+# 检查端口占用
+sudo lsof -i :8080
+
+# 手动测试
+cd /opt/clashlink/backend
+sudo -u clashlink ./clashlink
+```
+
+**权限问题**
+```bash
+# 重新设置权限
+sudo chown -R clashlink:clashlink /opt/clashlink
+sudo chmod +x /opt/clashlink/backend/clashlink
+```
+
+**数据库问题**
+```bash
+# 检查数据库文件
+ls -la /opt/clashlink/backend/data.db
+sudo -u clashlink touch /opt/clashlink/backend/data.db
+```
+
+#### 🎯 访问应用
+- **本地访问**: http://localhost:8080
+- **域名访问**: http://your-domain.com (如果配置了 Nginx)
+- **HTTPS 访问**: https://your-domain.com (如果配置了 SSL)
+
+#### 📈 性能优化建议
+- 定期清理过期的订阅文件
+- 使用 Nginx 缓存静态资源
+- 监控服务器资源使用情况
+- 设置日志轮转避免日志文件过大
 
 ## 使用说明
 
@@ -186,3 +472,4 @@ go build -o clash-converter.exe
 ## 贡献
 
 欢迎提交 Issue 和 Pull Request。
+
