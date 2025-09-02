@@ -13,10 +13,17 @@ import (
 
 // GenerateRequest 生成订阅请求结构
 type GenerateRequest struct {
-	Links      string `json:"links"`
-	CheckNodes bool   `json:"checkNodes"`
-	OnlyOnline bool   `json:"onlyOnline"`
-	ConfigName string `json:"configName"`
+	Links          string `json:"links"`
+	CheckNodes     bool   `json:"checkNodes"`
+	OnlyOnline     bool   `json:"onlyOnline"`
+	ConfigName     string `json:"configName"`
+	// 自定义配置选项
+	MixedPort      int    `json:"mixedPort"`
+	ControllerPort int    `json:"controllerPort"`
+	AllowLan       bool   `json:"allowLan"`
+	LogLevel       string `json:"logLevel"`
+	DNSMode        string `json:"dnsMode"`
+	EnableIPv6     bool   `json:"enableIPv6"`
 }
 
 // GenerateResponse 生成订阅响应结构
@@ -104,7 +111,7 @@ func GenerateSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 		configName = fmt.Sprintf("clash_config_%s_%d", user.Username, time.Now().Unix())
 	}
 
-	clashConfig := GenerateClashConfig(finalNodes, configName)
+	clashConfig := GenerateClashConfig(finalNodes, configName, req)
 
 	// 保存配置文件
 	filename := fmt.Sprintf("%s.yaml", configName)
@@ -185,71 +192,100 @@ func ResetSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // GenerateClashConfig 生成Clash配置文件
-func GenerateClashConfig(nodes []ProxyNode, configName string) string {
-	var config strings.Builder
-
+func GenerateClashConfig(nodes []ProxyNode, configName string, config GenerateRequest) string {
+	var configBuilder strings.Builder
+	
+	// 设置默认值
+	mixedPort := config.MixedPort
+	if mixedPort == 0 {
+		mixedPort = 7890
+	}
+	
+	controllerPort := config.ControllerPort
+	if controllerPort == 0 {
+		controllerPort = 9090
+	}
+	
+	logLevel := config.LogLevel
+	if logLevel == "" {
+		logLevel = "info"
+	}
+	
+	dnsMode := config.DNSMode
+	if dnsMode == "" {
+		dnsMode = "fake-ip"
+	}
+	
 	// 基础配置
-	config.WriteString(fmt.Sprintf(`# Clash配置文件 - %s
+	configBuilder.WriteString(fmt.Sprintf(`# Clash配置文件 - %s
 # 生成时间: %s
+# ClashLink 自动生成
 
-mixed-port: 7890
-allow-lan: true
+# 基础配置
+mixed-port: %d
+allow-lan: %t
 bind-address: '*'
 mode: rule
-log-level: info
-external-controller: '127.0.0.1:9090'
+log-level: %s
+external-controller: '127.0.0.1:%d'
 
+# DNS 配置
 dns:
   enable: true
-  ipv6: false
+  ipv6: %t
   default-nameserver:
     - 223.5.5.5
     - 114.114.114.114
-  enhanced-mode: fake-ip
+    - 8.8.8.8
+  enhanced-mode: %s
   fake-ip-range: 198.18.0.1/16
   use-hosts: true
   nameserver:
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
+    - https://cloudflare-dns.com/dns-query
 
+# 代理节点
 proxies:
-`, configName, time.Now().Format("2006-01-02 15:04:05")))
+`, configName, time.Now().Format("2006-01-02 15:04:05"), mixedPort, config.AllowLan, logLevel, controllerPort, config.EnableIPv6, dnsMode))
 
 	// 代理节点配置
 	proxyNames := make([]string, 0, len(nodes))
 	for _, node := range nodes {
 		proxyNames = append(proxyNames, node.Name)
-		config.WriteString(generateProxyConfig(node))
+		configBuilder.WriteString(generateProxyConfig(node))
 	}
 
 	// 代理组配置
-	config.WriteString("\nproxy-groups:\n")
-	config.WriteString("  - name: \"🚀 节点选择\"\n")
-	config.WriteString("    type: select\n")
-	config.WriteString("    proxies:\n")
-	config.WriteString("      - \"♻️ 自动选择\"\n")
-	config.WriteString("      - \"DIRECT\"\n")
+	configBuilder.WriteString("\n# 代理组\nproxy-groups:\n")
+	configBuilder.WriteString("  - name: \"🚀 节点选择\"\n")
+	configBuilder.WriteString("    type: select\n")
+	configBuilder.WriteString("    proxies:\n")
+	configBuilder.WriteString("      - \"♻️ 自动选择\"\n")
+	configBuilder.WriteString("      - \"🎯 全球直连\"\n")
 	for _, name := range proxyNames {
-		config.WriteString(fmt.Sprintf("      - \"%s\"\n", name))
+		configBuilder.WriteString(fmt.Sprintf("      - \"%s\"\n", name))
 	}
 
-	config.WriteString("  - name: \"♻️ 自动选择\"\n")
-	config.WriteString("    type: url-test\n")
-	config.WriteString("    url: http://www.gstatic.com/generate_204\n")
-	config.WriteString("    interval: 300\n")
-	config.WriteString("    proxies:\n")
+	configBuilder.WriteString("  - name: \"♻️ 自动选择\"\n")
+	configBuilder.WriteString("    type: url-test\n")
+	configBuilder.WriteString("    url: http://www.gstatic.com/generate_204\n")
+	configBuilder.WriteString("    interval: 300\n")
+	configBuilder.WriteString("    tolerance: 50\n")
+	configBuilder.WriteString("    proxies:\n")
 	for _, name := range proxyNames {
-		config.WriteString(fmt.Sprintf("      - \"%s\"\n", name))
+		configBuilder.WriteString(fmt.Sprintf("      - \"%s\"\n", name))
 	}
 
-	config.WriteString("  - name: \"🎯 全球直连\"\n")
-	config.WriteString("    type: select\n")
-	config.WriteString("    proxies:\n")
-	config.WriteString("      - \"DIRECT\"\n")
-	config.WriteString("      - \"🚀 节点选择\"\n")
+	configBuilder.WriteString("  - name: \"🎯 全球直连\"\n")
+	configBuilder.WriteString("    type: select\n")
+	configBuilder.WriteString("    proxies:\n")
+	configBuilder.WriteString("      - \"DIRECT\"\n")
+	configBuilder.WriteString("      - \"🚀 节点选择\"\n")
 
 	// 规则配置
-	config.WriteString(`
+	configBuilder.WriteString(`
+# 分流规则
 rules:
   - DOMAIN-SUFFIX,local,DIRECT
   - IP-CIDR,127.0.0.0/8,DIRECT
@@ -263,7 +299,7 @@ rules:
   - MATCH,🚀 节点选择
 `)
 
-	return config.String()
+	return configBuilder.String()
 }
 
 // generateProxyConfig 生成单个代理配置

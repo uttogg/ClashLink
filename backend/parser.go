@@ -44,19 +44,50 @@ type ProxyNode struct {
 
 // VMessLinkRaw 结构体用于解析 VMess 链接中的 JSON 内容
 type VMessLinkRaw struct {
-	V    string `json:"v"`
-	Ps   string `json:"ps"`   // 备注/名称
-	Add  string `json:"add"`  // 服务器地址
-	Port string `json:"port"` // 端口
-	ID   string `json:"id"`   // UUID
-	Aid  string `json:"aid"`  // AlterId
-	Scy  string `json:"scy"`  // 加密方式
-	Net  string `json:"net"`  // 网络类型 (tcp, ws, h2, ...)
-	Type string `json:"type"` // 加密类型 (none, http, ...)
-	Host string `json:"host"` // Host header (for ws/h2)
-	Path string `json:"path"` // Path (for ws/h2)
-	TLS  string `json:"tls"`  // TLS 类型 (tls, none, ...)
-	SNI  string `json:"sni"`  // TLS SNI
+	V    string      `json:"v"`
+	Ps   string      `json:"ps"`   // 备注/名称
+	Add  string      `json:"add"`  // 服务器地址
+	Port interface{} `json:"port"` // 端口 - 可能是字符串或数字
+	ID   string      `json:"id"`   // UUID
+	Aid  interface{} `json:"aid"`  // AlterId - 可能是字符串或数字
+	Scy  string      `json:"scy"`  // 加密方式
+	Net  string      `json:"net"`  // 网络类型 (tcp, ws, h2, ...)
+	Type string      `json:"type"` // 加密类型 (none, http, ...)
+	Host string      `json:"host"` // Host header (for ws/h2)
+	Path string      `json:"path"` // Path (for ws/h2)
+	TLS  string      `json:"tls"`  // TLS 类型 (tls, none, ...)
+	SNI  string      `json:"sni"`  // TLS SNI
+}
+
+// 辅助函数：将interface{}转换为整数
+func interfaceToInt(val interface{}) (int, error) {
+	switch v := val.(type) {
+	case string:
+		if v == "" {
+			return 0, nil
+		}
+		return strconv.Atoi(v)
+	case float64:
+		return int(v), nil
+	case int:
+		return v, nil
+	default:
+		return 0, fmt.Errorf("无法转换为整数: %v", val)
+	}
+}
+
+// 辅助函数：将interface{}转换为字符串
+func interfaceToString(val interface{}) string {
+	switch v := val.(type) {
+	case string:
+		return v
+	case float64:
+		return fmt.Sprintf("%.0f", v)
+	case int:
+		return strconv.Itoa(v)
+	default:
+		return fmt.Sprintf("%v", val)
+	}
 }
 
 // parseVMessLink 解析单个 VMess 链接并转换为 ProxyNode 结构体
@@ -91,20 +122,20 @@ func parseVMessLink(rawVMessLink string) (*ProxyNode, error) {
 	}
 
 	// 验证必要字段
-	if rawConfig.Add == "" || rawConfig.Port == "" || rawConfig.ID == "" {
+	if rawConfig.Add == "" || rawConfig.Port == nil || rawConfig.ID == "" {
 		return nil, fmt.Errorf("VMess链接缺少必要字段")
 	}
 
 	// 端口转换为 int
-	port, err := strconv.Atoi(rawConfig.Port)
+	port, err := interfaceToInt(rawConfig.Port)
 	if err != nil {
-		return nil, fmt.Errorf("VMess链接端口无效: %s", rawConfig.Port)
+		return nil, fmt.Errorf("VMess链接端口无效: %v", rawConfig.Port)
 	}
 
 	// alterId 转换为 int
 	alterID := 0
-	if rawConfig.Aid != "" {
-		alterID, _ = strconv.Atoi(rawConfig.Aid)
+	if rawConfig.Aid != nil {
+		alterID, _ = interfaceToInt(rawConfig.Aid)
 	}
 
 	// 设置默认名称

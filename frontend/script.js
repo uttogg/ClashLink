@@ -128,6 +128,14 @@ async function generateSubscription() {
     const onlyOnline = document.getElementById('onlyOnline').checked;
     const configName = document.getElementById('configName').value.trim();
     
+    // 获取自定义配置参数
+    const mixedPort = parseInt(document.getElementById('mixedPort').value) || 7890;
+    const controllerPort = parseInt(document.getElementById('controllerPort').value) || 9090;
+    const allowLan = document.getElementById('allowLan').checked;
+    const logLevel = document.getElementById('logLevel').value;
+    const dnsMode = document.getElementById('dnsMode').value;
+    const enableIPv6 = document.getElementById('enableIPv6').checked;
+    
     // 显示加载状态
     generateBtn.classList.add('loading');
     generateBtn.disabled = true;
@@ -144,7 +152,13 @@ async function generateSubscription() {
                 links: nodeLinks,
                 checkNodes: checkNodes,
                 onlyOnline: onlyOnline,
-                configName: configName
+                configName: configName,
+                mixedPort: mixedPort,
+                controllerPort: controllerPort,
+                allowLan: allowLan,
+                logLevel: logLevel,
+                dnsMode: dnsMode,
+                enableIPv6: enableIPv6
             })
         });
         

@@ -59,6 +59,63 @@
                             <input type="text" id="configName" placeholder="留空自动生成">
                             <small>生成的 YAML 配置文件名称</small>
                         </div>
+                        
+                        <!-- 高级配置 -->
+                        <details class="advanced-config">
+                            <summary>🔧 高级配置</summary>
+                            <div class="advanced-options">
+                                <div class="option-item">
+                                    <label for="mixedPort">混合端口</label>
+                                    <input type="number" id="mixedPort" value="7890" min="1" max="65535">
+                                    <small>Clash 混合代理端口 (HTTP + SOCKS5)</small>
+                                </div>
+                                
+                                <div class="option-item">
+                                    <label for="controllerPort">控制端口</label>
+                                    <input type="number" id="controllerPort" value="9090" min="1" max="65535">
+                                    <small>Clash 外部控制器端口</small>
+                                </div>
+                                
+                                <div class="option-item">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="allowLan" checked>
+                                        <span class="checkmark"></span>
+                                        允许局域网连接
+                                    </label>
+                                    <small>允许局域网设备使用代理</small>
+                                </div>
+                                
+                                <div class="option-item">
+                                    <label for="logLevel">日志级别</label>
+                                    <select id="logLevel">
+                                        <option value="info">Info</option>
+                                        <option value="warning">Warning</option>
+                                        <option value="error">Error</option>
+                                        <option value="debug">Debug</option>
+                                        <option value="silent">Silent</option>
+                                    </select>
+                                    <small>Clash 日志输出级别</small>
+                                </div>
+                                
+                                <div class="option-item">
+                                    <label for="dnsMode">DNS 模式</label>
+                                    <select id="dnsMode">
+                                        <option value="fake-ip">Fake IP</option>
+                                        <option value="redir-host">Redir Host</option>
+                                    </select>
+                                    <small>DNS 解析模式</small>
+                                </div>
+                                
+                                <div class="option-item">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="enableIPv6">
+                                        <span class="checkmark"></span>
+                                        启用 IPv6
+                                    </label>
+                                    <small>是否启用 IPv6 支持</small>
+                                </div>
+                            </div>
+                        </details>
                     </div>
                 </div>
                 
