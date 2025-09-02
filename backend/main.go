@@ -89,6 +89,7 @@ func main() {
 	})
 	mux.Handle("/api/generate", JWTMiddleware(http.HandlerFunc(GenerateSubscriptionHandler)))
 	mux.Handle("/api/reset-subscription", JWTMiddleware(http.HandlerFunc(ResetSubscriptionHandler)))
+	mux.Handle("/api/save-config", JWTMiddleware(http.HandlerFunc(SaveConfigHandler)))
 
 	log.Println("服务器启动在端口 8080")
 	log.Fatal(http.ListenAndServe(":8080", mux))

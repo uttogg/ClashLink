@@ -23,12 +23,20 @@ services:
     volumes:
       # SQLite 数据库文件持久化
       - ./data/database:/app/backend:rw
-      # 生成的订阅配置文件持久化
+      # 生成的订阅配置文件持久化  
       - ./data/subscriptions:/app/subscriptions:rw
       # 应用日志持久化
       - ./data/logs:/app/logs:rw
-      # 版本配置文件（可选，用于自定义版本信息）
-      - ./version.json:/app/version.json:ro
+    
+    # 确保数据目录在启动前创建
+    # 注意: 在生产环境中，建议手动创建这些目录并设置正确权限
+    command: >
+      sh -c "
+        mkdir -p /app/backend /app/subscriptions /app/logs &&
+        chmod 755 /app/backend /app/subscriptions /app/logs &&
+        chown -R clashlink:clashlink /app/backend /app/subscriptions /app/logs &&
+        ./clashlink
+      "
     
     # 环境变量配置
     environment:

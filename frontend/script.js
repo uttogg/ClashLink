@@ -84,6 +84,14 @@ function setupEventListeners() {
     // 重置订阅
     document.getElementById('resetSubscription').addEventListener('click', resetSubscription);
     
+    // YAML 编辑器功能
+    document.getElementById('editConfig').addEventListener('click', startEditConfig);
+    document.getElementById('saveConfig').addEventListener('click', saveEditedConfig);
+    document.getElementById('cancelEdit').addEventListener('click', cancelEditConfig);
+    
+    // YAML 编辑器实时更新
+    document.getElementById('yamlEditor').addEventListener('input', updateEditorStatus);
+    
     // 复选框联动
     const checkNodesCheckbox = document.getElementById('checkNodes');
     const onlyOnlineCheckbox = document.getElementById('onlyOnline');
@@ -383,6 +391,12 @@ async function resetSubscription() {
                 configContent.textContent = '';
             }
             
+            // 清空编辑器
+            const yamlEditor = document.getElementById('yamlEditor');
+            if (yamlEditor) {
+                yamlEditor.value = '';
+            }
+            
             // 清空全局配置缓存
             window.currentConfig = null;
             
@@ -392,6 +406,152 @@ async function resetSubscription() {
     } catch (error) {
         console.error('重置订阅错误:', error);
         showMessage('网络错误，请稍后重试', 'error');
+    }
+}
+
+// 开始编辑配置
+function startEditConfig() {
+    const configContent = document.getElementById('configContent');
+    const configEditor = document.getElementById('configEditor');
+    const yamlEditor = document.getElementById('yamlEditor');
+    
+    // 检查是否有配置内容
+    if (!window.currentConfig || !window.currentConfig.content) {
+        showMessage('请先生成订阅配置', 'error');
+        return;
+    }
+    
+    // 切换到编辑模式
+    configContent.style.display = 'none';
+    configEditor.style.display = 'block';
+    
+    // 设置编辑器内容
+    yamlEditor.value = window.currentConfig.content;
+    
+    // 更新按钮显示
+    document.getElementById('toggleConfig').style.display = 'none';
+    document.getElementById('editConfig').style.display = 'none';
+    document.getElementById('saveConfig').style.display = 'inline-block';
+    document.getElementById('cancelEdit').style.display = 'inline-block';
+    
+    // 更新状态
+    updateEditorStatus();
+    
+    // 聚焦编辑器
+    yamlEditor.focus();
+    
+    showMessage('进入编辑模式，您可以直接修改 YAML 配置', 'info');
+}
+
+// 取消编辑
+function cancelEditConfig() {
+    const configContent = document.getElementById('configContent');
+    const configEditor = document.getElementById('configEditor');
+    
+    // 切换回预览模式
+    configEditor.style.display = 'none';
+    if (configContent.textContent) {
+        configContent.style.display = 'block';
+    }
+    
+    // 恢复按钮显示
+    document.getElementById('toggleConfig').style.display = 'inline-block';
+    document.getElementById('editConfig').style.display = 'inline-block';
+    document.getElementById('saveConfig').style.display = 'none';
+    document.getElementById('cancelEdit').style.display = 'none';
+    
+    showMessage('已取消编辑', 'info');
+}
+
+// 保存编辑的配置
+async function saveEditedConfig() {
+    const yamlEditor = document.getElementById('yamlEditor');
+    const editedContent = yamlEditor.value.trim();
+    
+    if (!editedContent) {
+        showMessage('配置内容不能为空', 'error');
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('jwt_token');
+        showMessage('正在保存配置...', 'info');
+        
+        const response = await fetch('/api/save-config', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                configContent: editedContent,
+                filename: window.currentConfig ? window.currentConfig.filename : null
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            showMessage('✅ 配置保存成功', 'success');
+            
+            // 更新全局配置缓存
+            if (window.currentConfig) {
+                window.currentConfig.content = editedContent;
+            }
+            
+            // 更新预览内容
+            const configContent = document.getElementById('configContent');
+            configContent.textContent = editedContent;
+            
+            // 更新订阅链接
+            if (data.subscriptionUrl) {
+                const subscriptionUrl = document.getElementById('subscriptionUrl');
+                if (subscriptionUrl) {
+                    subscriptionUrl.value = data.subscriptionUrl;
+                }
+            }
+            
+            // 退出编辑模式
+            cancelEditConfig();
+            
+        } else {
+            showMessage(data.message || '保存失败', 'error');
+        }
+    } catch (error) {
+        console.error('保存配置错误:', error);
+        showMessage('网络错误，请稍后重试', 'error');
+    }
+}
+
+// 更新编辑器状态
+function updateEditorStatus() {
+    const yamlEditor = document.getElementById('yamlEditor');
+    const editorStatus = document.getElementById('editorStatus');
+    const lineCount = document.getElementById('lineCount');
+    
+    if (!yamlEditor || !editorStatus || !lineCount) return;
+    
+    const content = yamlEditor.value;
+    const lines = content.split('\n').length;
+    
+    lineCount.textContent = `${lines} 行`;
+    
+    // 简单的YAML语法检查
+    try {
+        // 检查基本的YAML语法
+        if (content.trim() === '') {
+            editorStatus.textContent = '配置为空';
+            editorStatus.className = 'status-text error';
+        } else if (content.includes('proxies:')) {
+            editorStatus.textContent = '配置格式正常';
+            editorStatus.className = 'status-text success';
+        } else {
+            editorStatus.textContent = '请确保包含 proxies 部分';
+            editorStatus.className = 'status-text error';
+        }
+    } catch (e) {
+        editorStatus.textContent = '配置格式错误';
+        editorStatus.className = 'status-text error';
     }
 }
 

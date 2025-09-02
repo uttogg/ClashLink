@@ -153,15 +153,35 @@
                     <div class="status-list" id="statusList"></div>
                 </div>
                 
-                <!-- 配置预览 -->
+                <!-- 配置预览和编辑 -->
                 <div class="config-preview">
-                    <h3>配置预览</h3>
+                    <h3>配置管理</h3>
                     <div class="config-actions">
                         <button id="toggleConfig" class="toggle-btn">显示配置</button>
+                        <button id="editConfig" class="edit-btn">编辑配置</button>
+                        <button id="saveConfig" class="save-btn" style="display: none;">保存配置</button>
+                        <button id="cancelEdit" class="cancel-btn" style="display: none;">取消编辑</button>
                         <button id="downloadConfig" class="download-btn">下载配置</button>
                         <button id="resetSubscription" class="reset-btn">重置订阅</button>
                     </div>
+                    
+                    <!-- 只读预览 -->
                     <pre id="configContent" class="config-content" style="display: none;"></pre>
+                    
+                    <!-- 可编辑的YAML编辑器 -->
+                    <div id="configEditor" class="config-editor" style="display: none;">
+                        <div class="editor-toolbar">
+                            <span class="editor-title">📝 YAML 配置编辑器</span>
+                            <div class="editor-tips">
+                                <small>💡 提示: 只需编辑 proxies 部分，其他配置会自动保留</small>
+                            </div>
+                        </div>
+                        <textarea id="yamlEditor" class="yaml-editor" placeholder="YAML 配置将在这里显示..."></textarea>
+                        <div class="editor-status">
+                            <span id="editorStatus" class="status-text">准备就绪</span>
+                            <span id="lineCount" class="line-count">0 行</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>

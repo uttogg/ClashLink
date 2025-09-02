@@ -40,8 +40,8 @@ COPY frontend/ ./frontend/
 
 # 创建订阅文件目录并设置权限
 # subscriptions/ 目录用于存储生成的 Clash 配置文件
-# 设置 777 权限确保应用可以写入文件
-RUN mkdir -p ./subscriptions && chmod 777 ./subscriptions
+# 设置 755 权限确保应用可以写入文件
+RUN mkdir -p ./subscriptions && chmod 755 ./subscriptions
 
 # 复制版本配置文件
 # version.json 包含应用的版本信息和配置
@@ -97,6 +97,7 @@ COPY --from=builder /app/version.json ./version.json
 # 创建数据持久化目录
 # 这些目录将在运行时挂载为数据卷
 RUN mkdir -p /app/backend /app/subscriptions /app/logs && \
+    chmod 755 /app/backend /app/subscriptions /app/logs && \
     chown -R clashlink:clashlink /app
 
 # 设置可执行文件权限

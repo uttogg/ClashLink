@@ -25,7 +25,7 @@
 docker pull alpine:latest
 
 # 测试 Go 代理连接
-curl -I https://proxy.golang.org
+c
 ```
 
 ### 2. 构建镜像

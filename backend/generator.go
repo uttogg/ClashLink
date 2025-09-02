@@ -191,6 +191,93 @@ func ResetSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// SaveConfigRequest 保存配置请求结构
+type SaveConfigRequest struct {
+	ConfigContent string `json:"configContent"`
+	Filename      string `json:"filename"`
+}
+
+// SaveConfigHandler 处理保存配置请求
+func SaveConfigHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "只支持POST方法", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// 获取用户信息
+	user, ok := GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "无法获取用户信息", http.StatusUnauthorized)
+		return
+	}
+
+	var req SaveConfigRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "无效的请求数据", http.StatusBadRequest)
+		return
+	}
+
+	// 验证配置内容
+	if strings.TrimSpace(req.ConfigContent) == "" {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"message": "配置内容不能为空",
+		})
+		return
+	}
+
+	// 简单的YAML格式验证
+	if !strings.Contains(req.ConfigContent, "proxies:") {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"message": "配置文件必须包含 proxies 部分",
+		})
+		return
+	}
+
+	// 确定文件名
+	filename := req.Filename
+	if filename == "" {
+		filename = fmt.Sprintf("clash_config_%s_%d.yaml", user.Username, time.Now().Unix())
+	}
+
+	// 确保文件名以.yaml结尾
+	if !strings.HasSuffix(filename, ".yaml") && !strings.HasSuffix(filename, ".yml") {
+		filename += ".yaml"
+	}
+
+	// 确定保存路径
+	subscriptionDir := "../subscriptions"
+	if _, err := os.Stat("/app"); err == nil {
+		subscriptionDir = "/app/subscriptions"
+	}
+	
+	filePath := filepath.Join(subscriptionDir, filename)
+
+	// 保存文件
+	if err := os.WriteFile(filePath, []byte(req.ConfigContent), 0644); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"message": fmt.Sprintf("保存配置文件失败: %v", err),
+		})
+		return
+	}
+
+	// 生成订阅URL
+	subscriptionURL := fmt.Sprintf("http://%s/subscriptions/%s", r.Host, filename)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success":         true,
+		"message":         "配置保存成功",
+		"filename":        filename,
+		"subscriptionUrl": subscriptionURL,
+	})
+}
+
 // GenerateClashConfig 生成Clash配置文件
 func GenerateClashConfig(nodes []ProxyNode, configName string, config GenerateRequest) string {
 	var configBuilder strings.Builder
