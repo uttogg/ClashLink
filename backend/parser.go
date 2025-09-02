@@ -12,34 +12,34 @@ import (
 
 // ProxyNode 结构体用于存储解析后的节点信息，以便转换为 Clash YAML 格式
 type ProxyNode struct {
-	Name           string            `yaml:"name"`
-	Type           string            `yaml:"type"` // vmess, vless, ss, trojan, etc.
-	Server         string            `yaml:"server"`
-	Port           int               `yaml:"port"`
-	UUID           string            `yaml:"uuid,omitempty"`      // For vmess/vless
-	Password       string            `yaml:"password,omitempty"`  // For ss/trojan/vless (VLESS password is UUID)
-	AlterID        int               `yaml:"alterId,omitempty"`   // For vmess
-	Cipher         string            `yaml:"cipher,omitempty"`    // For vmess/ss
-	TLS            *bool             `yaml:"tls,omitempty"`       // Pointer to bool to differentiate false from omitted
-	SkipCertVerify bool              `yaml:"skip-cert-verify,omitempty"`
-	Network        string            `yaml:"network,omitempty"` // tcp, ws, http, h2, grpc
-	HTTPOpts       *struct {         // For http network (e.g. VLESS h2)
+	Name           string    `yaml:"name"`
+	Type           string    `yaml:"type"` // vmess, vless, ss, trojan, etc.
+	Server         string    `yaml:"server"`
+	Port           int       `yaml:"port"`
+	UUID           string    `yaml:"uuid,omitempty"`     // For vmess/vless
+	Password       string    `yaml:"password,omitempty"` // For ss/trojan/vless (VLESS password is UUID)
+	AlterID        int       `yaml:"alterId,omitempty"`  // For vmess
+	Cipher         string    `yaml:"cipher,omitempty"`   // For vmess/ss
+	TLS            *bool     `yaml:"tls,omitempty"`      // Pointer to bool to differentiate false from omitted
+	SkipCertVerify bool      `yaml:"skip-cert-verify,omitempty"`
+	Network        string    `yaml:"network,omitempty"` // tcp, ws, http, h2, grpc
+	HTTPOpts       *struct { // For http network (e.g. VLESS h2)
 		Method  string            `yaml:"method,omitempty"`
 		Headers map[string]string `yaml:"headers,omitempty"`
 		Path    string            `yaml:"path,omitempty"`
 	} `yaml:"http-opts,omitempty"`
-	WSOpts         *struct {         // For ws network
+	WSOpts *struct { // For ws network
 		Path    string            `yaml:"path"`
 		Headers map[string]string `yaml:"headers,omitempty"`
 	} `yaml:"ws-opts,omitempty"`
-	GRPCopts       *struct {         // For grpc network
+	GRPCopts *struct { // For grpc network
 		ServiceName string `yaml:"service-name,omitempty"`
 		Mode        string `yaml:"mode,omitempty"`
 	} `yaml:"grpc-opts,omitempty"`
-	Flow           string            `yaml:"flow,omitempty"`      // For VLESS XTLS/Reality
-	UDP            bool              `yaml:"udp,omitempty"`       // For UDP forwarding
-	SNI            string            `yaml:"servername,omitempty"` // TLS SNI
-	Fingerprint    string            `yaml:"client-fingerprint,omitempty"` // Reality fingerprint
+	Flow        string `yaml:"flow,omitempty"`               // For VLESS XTLS/Reality
+	UDP         bool   `yaml:"udp,omitempty"`                // For UDP forwarding
+	SNI         string `yaml:"servername,omitempty"`         // TLS SNI
+	Fingerprint string `yaml:"client-fingerprint,omitempty"` // Reality fingerprint
 }
 
 // VMessLinkRaw 结构体用于解析 VMess 链接中的 JSON 内容
@@ -272,7 +272,7 @@ func parseVLESSLink(rawVLESSLink string) (*ProxyNode, error) {
 		if wsHost == "" {
 			wsHost = server
 		}
-		
+
 		node.WSOpts = &struct {
 			Path    string            `yaml:"path"`
 			Headers map[string]string `yaml:"headers,omitempty"`
@@ -289,7 +289,7 @@ func parseVLESSLink(rawVLESSLink string) (*ProxyNode, error) {
 		if mode == "" {
 			mode = "gun" // 默认模式
 		}
-		
+
 		node.GRPCopts = &struct {
 			ServiceName string `yaml:"service-name,omitempty"`
 			Mode        string `yaml:"mode,omitempty"`
@@ -304,7 +304,7 @@ func parseVLESSLink(rawVLESSLink string) (*ProxyNode, error) {
 		if httpHost == "" {
 			httpHost = server
 		}
-		
+
 		node.HTTPOpts = &struct {
 			Method  string            `yaml:"method,omitempty"`
 			Headers map[string]string `yaml:"headers,omitempty"`

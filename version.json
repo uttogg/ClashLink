@@ -1,6 +1,6 @@
 {
     "name": "ClashLink",
-    "version": "v0.1.0.2",
+    "version": "v0.1.0.4",
     "build_time": "2025-09-01T12:00:00Z",
     "git_commit": "initial",
     "go_version": "1.21",

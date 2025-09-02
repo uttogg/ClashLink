@@ -284,25 +284,35 @@ func generateProxyConfig(node ProxyNode) string {
 		config.WriteString(fmt.Sprintf("    cipher: %s\n", node.Cipher))
 	}
 
-	if node.Network != "" && node.Network != "tcp" {
+		if node.Network != "" && node.Network != "tcp" {
 		config.WriteString(fmt.Sprintf("    network: %s\n", node.Network))
-
-		if node.Network == "ws" {
-			if node.Path != "" {
-				config.WriteString(fmt.Sprintf("    ws-path: %s\n", node.Path))
+		
+		if node.Network == "ws" && node.WSOpts != nil {
+			if node.WSOpts.Path != "" {
+				config.WriteString(fmt.Sprintf("    ws-path: %s\n", node.WSOpts.Path))
 			}
-			if node.Host != "" {
-				config.WriteString(fmt.Sprintf("    ws-headers:\n      Host: %s\n", node.Host))
+			if node.WSOpts.Headers != nil && node.WSOpts.Headers["Host"] != "" {
+				config.WriteString(fmt.Sprintf("    ws-headers:\n      Host: %s\n", node.WSOpts.Headers["Host"]))
 			}
-		} else if node.Network == "grpc" && node.Path != "" {
-			config.WriteString(fmt.Sprintf("    grpc-service-name: %s\n", node.Path))
+		} else if node.Network == "grpc" && node.GRPCopts != nil && node.GRPCopts.ServiceName != "" {
+			config.WriteString(fmt.Sprintf("    grpc-service-name: %s\n", node.GRPCopts.ServiceName))
+		} else if (node.Network == "h2" || node.Network == "http") && node.HTTPOpts != nil {
+			if node.HTTPOpts.Path != "" {
+				config.WriteString(fmt.Sprintf("    h2-opts:\n      path: %s\n", node.HTTPOpts.Path))
+			}
+			if node.HTTPOpts.Headers != nil && node.HTTPOpts.Headers["Host"] != "" {
+				config.WriteString(fmt.Sprintf("      host: %s\n", node.HTTPOpts.Headers["Host"]))
+			}
 		}
 	}
-
-	if node.TLS {
+	
+	if node.TLS != nil && *node.TLS {
 		config.WriteString("    tls: true\n")
 		if node.SNI != "" {
 			config.WriteString(fmt.Sprintf("    servername: %s\n", node.SNI))
+		}
+		if node.SkipCertVerify {
+			config.WriteString("    skip-cert-verify: true\n")
 		}
 	}
 
