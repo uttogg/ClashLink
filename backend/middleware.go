@@ -10,11 +10,23 @@ import (
 // JWTMiddleware JWT认证中间件
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// 对于页面访问（非API），重定向到登录页面而不是返回错误
+		isPageRequest := r.Header.Get("Accept") != "" &&
+			(strings.Contains(r.Header.Get("Accept"), "text/html") ||
+				strings.Contains(r.Header.Get("Accept"), "*/*"))
+
 		// 从请求头获取Authorization
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			http.Error(w, "缺少认证令牌", http.StatusUnauthorized)
-			return
+			if isPageRequest {
+				// 页面请求重定向到登录页
+				http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+				return
+			} else {
+				// API请求返回错误
+				http.Error(w, "缺少认证令牌", http.StatusUnauthorized)
+				return
+			}
 		}
 
 		// 检查Bearer前缀
@@ -52,4 +64,3 @@ func GetUserFromContext(r *http.Request) (*Claims, bool) {
 	user, ok := r.Context().Value("user").(*Claims)
 	return user, ok
 }
-

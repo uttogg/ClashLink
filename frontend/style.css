@@ -510,7 +510,7 @@ body::after {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 0;
+    padding: 1.5rem 2rem;
 }
 
 .header h1 {
@@ -527,6 +527,7 @@ body::after {
     gap: 1rem;
     color: var(--text-light);
     font-weight: 500;
+    margin-right: 0;
 }
 
 .logout-btn {
@@ -964,7 +965,7 @@ body::after {
     flex-wrap: wrap;
 }
 
-.toggle-btn, .download-btn {
+.toggle-btn, .download-btn, .reset-btn {
     padding: 0.75rem 1.25rem;
     border: 1px solid var(--glass-border);
     border-radius: 12px;
@@ -980,6 +981,18 @@ body::after {
     background: rgba(255, 255, 255, 0.15);
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+}
+
+.reset-btn {
+    background: rgba(245, 101, 101, 0.15);
+    color: #F56565;
+    border-color: rgba(245, 101, 101, 0.3);
+}
+
+.reset-btn:hover {
+    background: rgba(245, 101, 101, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3);
 }
 
 .config-content {

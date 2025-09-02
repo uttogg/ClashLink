@@ -78,14 +78,17 @@ func main() {
 	mux.HandleFunc("/api/check-update", CheckVersionHandler)
 
 	// 保护路由（需要JWT认证）
-	mux.Handle("/app", JWTMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// 对于/app页面，我们需要特殊处理，因为浏览器直接访问HTML页面不会携带JWT
+	mux.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
+		// 直接返回HTML页面，让前端JavaScript处理认证检查
 		indexPath := "../frontend/index.html"
 		if _, err := os.Stat("/app"); err == nil {
 			indexPath = "/app/frontend/index.html"
 		}
 		http.ServeFile(w, r, indexPath)
-	})))
+	})
 	mux.Handle("/api/generate", JWTMiddleware(http.HandlerFunc(GenerateSubscriptionHandler)))
+	mux.Handle("/api/reset-subscription", JWTMiddleware(http.HandlerFunc(ResetSubscriptionHandler)))
 
 	log.Println("服务器启动在端口 8080")
 	log.Fatal(http.ListenAndServe(":8080", mux))

@@ -9,16 +9,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 检查现有登录状态
 function checkExistingLogin() {
+    console.log('检查现有登录状态...');
     const token = localStorage.getItem('jwt_token');
+    
     if (token) {
+        console.log('找到JWT令牌，验证有效性...');
         // 验证token是否有效
         if (isTokenValid(token)) {
+            console.log('JWT令牌有效，跳转到主应用');
             window.location.href = '/app';
             return;
         } else {
+            console.log('JWT令牌无效，清除并继续登录流程');
             // token无效，清除
             localStorage.removeItem('jwt_token');
         }
+    } else {
+        console.log('未找到JWT令牌，显示登录页面');
     }
 }
 
@@ -118,11 +125,20 @@ async function handleLogin(e) {
         const data = await response.json();
         
         if (response.ok && data.token) {
+            // 保存token
             localStorage.setItem('jwt_token', data.token);
-            showMessage('登录成功，正在跳转...', 'success');
-            setTimeout(() => {
-                window.location.href = '/app';
-            }, 1000);
+            
+            // 验证token是否正确保存
+            const savedToken = localStorage.getItem('jwt_token');
+            if (savedToken === data.token) {
+                showMessage('登录成功，正在跳转...', 'success');
+                // 使用 window.location.replace 避免浏览器后退问题
+                setTimeout(() => {
+                    window.location.replace('/app');
+                }, 1000);
+            } else {
+                showMessage('令牌保存失败，请重试', 'error');
+            }
         } else {
             showMessage(data.message || '登录失败', 'error');
         }

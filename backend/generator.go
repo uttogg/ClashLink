@@ -133,6 +133,57 @@ func GenerateSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// ResetSubscriptionHandler 处理重置订阅请求
+func ResetSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "只支持POST方法", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// 获取用户信息
+	user, ok := GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "无法获取用户信息", http.StatusUnauthorized)
+		return
+	}
+
+	// 删除用户的所有订阅文件
+	subscriptionDir := "../subscriptions"
+	if _, err := os.Stat("/app"); err == nil {
+		subscriptionDir = "/app/subscriptions"
+	}
+
+	// 查找用户的订阅文件
+	files, err := os.ReadDir(subscriptionDir)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"message": "读取订阅目录失败",
+		})
+		return
+	}
+
+	deletedCount := 0
+	userPrefix := fmt.Sprintf("clash_config_%s_", user.Username)
+
+	for _, file := range files {
+		if !file.IsDir() && strings.HasPrefix(file.Name(), userPrefix) && strings.HasSuffix(file.Name(), ".yaml") {
+			filePath := filepath.Join(subscriptionDir, file.Name())
+			if err := os.Remove(filePath); err == nil {
+				deletedCount++
+			}
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": fmt.Sprintf("已删除 %d 个订阅文件", deletedCount),
+		"deleted_count": deletedCount,
+	})
+}
+
 // GenerateClashConfig 生成Clash配置文件
 func GenerateClashConfig(nodes []ProxyNode, configName string) string {
 	var config strings.Builder

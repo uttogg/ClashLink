@@ -12,13 +12,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 检查认证状态
 function checkAuthStatus() {
+    console.log('检查认证状态...');
     const token = localStorage.getItem('jwt_token');
-    if (!token || !isTokenValid(token)) {
-        // 未登录或token无效，重定向到登录页
+    
+    if (!token) {
+        console.log('未找到JWT令牌，重定向到登录页');
+        localStorage.removeItem('jwt_token');
         window.location.href = '/login';
         return;
     }
     
+    if (!isTokenValid(token)) {
+        console.log('JWT令牌无效或已过期，重定向到登录页');
+        localStorage.removeItem('jwt_token');
+        window.location.href = '/login';
+        return;
+    }
+    
+    console.log('JWT令牌有效，显示用户信息');
     // 显示用户信息
     displayUserInfo(token);
 }
@@ -69,6 +80,9 @@ function setupEventListeners() {
     
     // 下载配置
     document.getElementById('downloadConfig').addEventListener('click', downloadConfig);
+    
+    // 重置订阅
+    document.getElementById('resetSubscription').addEventListener('click', resetSubscription);
     
     // 复选框联动
     const checkNodesCheckbox = document.getElementById('checkNodes');
@@ -311,6 +325,60 @@ function showMessage(text, type = 'info') {
     setTimeout(() => {
         messageEl.classList.remove('show');
     }, 3000);
+}
+
+// 重置订阅
+async function resetSubscription() {
+    // 确认对话框
+    if (!confirm('⚠️ 确定要重置所有订阅链接吗？\n\n这将删除您的所有历史订阅文件，此操作不可恢复！')) {
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('jwt_token');
+        showMessage('正在重置订阅...', 'info');
+        
+        const response = await fetch('/api/reset-subscription', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            showMessage(`✅ ${data.message}`, 'success');
+            
+            // 清空当前显示的订阅链接
+            const subscriptionUrl = document.getElementById('subscriptionUrl');
+            if (subscriptionUrl) {
+                subscriptionUrl.value = '';
+            }
+            
+            // 隐藏结果区域
+            const resultSection = document.getElementById('resultSection');
+            if (resultSection) {
+                resultSection.style.display = 'none';
+            }
+            
+            // 清空配置内容
+            const configContent = document.getElementById('configContent');
+            if (configContent) {
+                configContent.textContent = '';
+            }
+            
+            // 清空全局配置缓存
+            window.currentConfig = null;
+            
+        } else {
+            showMessage(data.message || '重置失败', 'error');
+        }
+    } catch (error) {
+        console.error('重置订阅错误:', error);
+        showMessage('网络错误，请稍后重试', 'error');
+    }
 }
 
 // 处理网络错误
