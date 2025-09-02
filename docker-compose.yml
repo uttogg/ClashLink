@@ -7,7 +7,7 @@ services:
   # ClashLink 主应用服务
   clashlink:
     # 使用 Docker Hub 镜像
-    image: uttogg/clashlink:${VERSION:-latest}
+    image: uttogg/clashlink:v0.1.0.7
     
     # 容器名称
     container_name: clashlink-app
@@ -28,15 +28,8 @@ services:
       # 应用日志持久化
       - ./data/logs:/app/logs:rw
     
-    # 确保数据目录在启动前创建
-    # 注意: 在生产环境中，建议手动创建这些目录并设置正确权限
-    command: >
-      sh -c "
-        mkdir -p /app/backend /app/subscriptions /app/logs &&
-        chmod 755 /app/backend /app/subscriptions /app/logs &&
-        chown -R clashlink:clashlink /app/backend /app/subscriptions /app/logs &&
-        ./clashlink
-      "
+    # 直接运行应用，Dockerfile 已经设置了正确的权限
+    command: ["./clashlink"]
     
     # 环境变量配置
     environment:

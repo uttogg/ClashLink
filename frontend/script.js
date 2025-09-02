@@ -92,6 +92,14 @@ function setupEventListeners() {
     // YAML 编辑器实时更新
     document.getElementById('yamlEditor').addEventListener('input', updateEditorStatus);
     
+    // 默认配置管理
+    document.getElementById('saveDefaultConfig').addEventListener('click', saveDefaultConfig);
+    document.getElementById('loadDefaultConfig').addEventListener('click', loadDefaultConfig);
+    document.getElementById('resetDefaultConfig').addEventListener('click', resetDefaultConfig);
+    
+    // 页面加载时自动加载默认配置
+    loadDefaultConfig();
+    
     // 复选框联动
     const checkNodesCheckbox = document.getElementById('checkNodes');
     const onlyOnlineCheckbox = document.getElementById('onlyOnline');
@@ -134,7 +142,8 @@ async function generateSubscription() {
     const generateBtn = document.getElementById('generateBtn');
     const checkNodes = document.getElementById('checkNodes').checked;
     const onlyOnline = document.getElementById('onlyOnline').checked;
-    const configName = document.getElementById('configName').value.trim();
+    const configName = document.getElementById('configName').value.trim() || 
+                      document.getElementById('defaultConfigName').value.trim() || 'ClashLink配置';
     
     // 获取自定义配置参数
     const mixedPort = parseInt(document.getElementById('mixedPort').value) || 7890;
@@ -143,6 +152,7 @@ async function generateSubscription() {
     const logLevel = document.getElementById('logLevel').value;
     const dnsMode = document.getElementById('dnsMode').value;
     const enableIPv6 = document.getElementById('enableIPv6').checked;
+    const customRules = document.getElementById('customRules').value.trim();
     
     // 显示加载状态
     generateBtn.classList.add('loading');
@@ -166,7 +176,8 @@ async function generateSubscription() {
                 allowLan: allowLan,
                 logLevel: logLevel,
                 dnsMode: dnsMode,
-                enableIPv6: enableIPv6
+                enableIPv6: enableIPv6,
+                customRules: customRules
             })
         });
         
@@ -552,6 +563,83 @@ function updateEditorStatus() {
     } catch (e) {
         editorStatus.textContent = '配置格式错误';
         editorStatus.className = 'status-text error';
+    }
+}
+
+// 保存默认配置
+function saveDefaultConfig() {
+    const configName = document.getElementById('defaultConfigName').value.trim();
+    const customRules = document.getElementById('customRules').value.trim();
+    
+    if (!configName) {
+        showMessage('请输入配置名称', 'error');
+        return;
+    }
+    
+    // 收集当前的高级配置
+    const advancedConfig = {
+        mixedPort: parseInt(document.getElementById('mixedPort').value) || 7890,
+        controllerPort: parseInt(document.getElementById('controllerPort').value) || 9090,
+        allowLan: document.getElementById('allowLan').checked,
+        logLevel: document.getElementById('logLevel').value,
+        dnsMode: document.getElementById('dnsMode').value,
+        enableIPv6: document.getElementById('enableIPv6').checked,
+        configName: configName,
+        customRules: customRules
+    };
+    
+    // 保存到localStorage
+    localStorage.setItem('clashlink_default_config', JSON.stringify(advancedConfig));
+    
+    showMessage('✅ 默认配置已保存', 'success');
+}
+
+// 加载默认配置
+function loadDefaultConfig() {
+    const savedConfig = localStorage.getItem('clashlink_default_config');
+    
+    if (savedConfig) {
+        try {
+            const config = JSON.parse(savedConfig);
+            
+            // 应用保存的配置
+            if (config.mixedPort) document.getElementById('mixedPort').value = config.mixedPort;
+            if (config.controllerPort) document.getElementById('controllerPort').value = config.controllerPort;
+            if (config.allowLan !== undefined) document.getElementById('allowLan').checked = config.allowLan;
+            if (config.logLevel) document.getElementById('logLevel').value = config.logLevel;
+            if (config.dnsMode) document.getElementById('dnsMode').value = config.dnsMode;
+            if (config.enableIPv6 !== undefined) document.getElementById('enableIPv6').checked = config.enableIPv6;
+            if (config.configName) document.getElementById('defaultConfigName').value = config.configName;
+            if (config.customRules) document.getElementById('customRules').value = config.customRules;
+            
+            showMessage('📥 默认配置已加载', 'info');
+        } catch (e) {
+            console.error('加载默认配置失败:', e);
+            showMessage('加载默认配置失败', 'error');
+        }
+    } else {
+        // 设置默认值
+        document.getElementById('defaultConfigName').value = 'ClashLink配置';
+        showMessage('📝 使用默认配置', 'info');
+    }
+}
+
+// 重置默认配置
+function resetDefaultConfig() {
+    if (confirm('确定要重置所有默认配置吗？这将恢复出厂设置。')) {
+        localStorage.removeItem('clashlink_default_config');
+        
+        // 重置所有字段到默认值
+        document.getElementById('mixedPort').value = '7890';
+        document.getElementById('controllerPort').value = '9090';
+        document.getElementById('allowLan').checked = true;
+        document.getElementById('logLevel').value = 'info';
+        document.getElementById('dnsMode').value = 'fake-ip';
+        document.getElementById('enableIPv6').checked = false;
+        document.getElementById('defaultConfigName').value = 'ClashLink配置';
+        document.getElementById('customRules').value = '';
+        
+        showMessage('🔄 默认配置已重置', 'info');
     }
 }
 

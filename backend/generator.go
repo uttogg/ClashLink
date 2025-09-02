@@ -24,6 +24,7 @@ type GenerateRequest struct {
 	LogLevel       string `json:"logLevel"`
 	DNSMode        string `json:"dnsMode"`
 	EnableIPv6     bool   `json:"enableIPv6"`
+	CustomRules    string `json:"customRules"`
 }
 
 // GenerateResponse 生成订阅响应结构
@@ -382,7 +383,22 @@ rules:
   - IP-CIDR,17.0.0.0/8,DIRECT
   - IP-CIDR,100.64.0.0/10,DIRECT
   - DOMAIN-SUFFIX,cn,🎯 全球直连
-  - GEOIP,CN,🎯 全球直连
+  - GEOIP,CN,🎯 全球直连`)
+
+	// 添加自定义规则
+	if config.CustomRules != "" {
+		configBuilder.WriteString("\n  # 自定义规则\n")
+		// 按行分割自定义规则
+		rules := strings.Split(strings.TrimSpace(config.CustomRules), "\n")
+		for _, rule := range rules {
+			rule = strings.TrimSpace(rule)
+			if rule != "" && !strings.HasPrefix(rule, "#") {
+				configBuilder.WriteString(fmt.Sprintf("  %s\n", rule))
+			}
+		}
+	}
+
+	configBuilder.WriteString(`
   - MATCH,🚀 节点选择
 `)
 

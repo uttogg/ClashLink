@@ -807,6 +807,139 @@ body::after {
     transform: none !important;
 }
 
+/* 默认配置样式 */
+.default-config {
+    margin-top: 1.5rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+.default-config summary {
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-light);
+    list-style: none;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.default-config summary::-webkit-details-marker {
+    display: none;
+}
+
+.default-config summary::before {
+    content: '▶';
+    margin-right: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.default-config[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.default-config summary:hover {
+    color: var(--primary-orange);
+}
+
+.default-options {
+    padding: 0 1.5rem 1.5rem;
+    border-top: 1px solid var(--glass-border);
+    margin-top: -1px;
+    animation: slideInUp 0.3s ease-out;
+}
+
+.default-options .option-item {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.default-options textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: var(--text-bright);
+    font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.default-options textarea:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 2px rgba(76, 111, 255, 0.2);
+}
+
+.default-options textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.option-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.save-default-btn,
+.load-default-btn,
+.reset-default-btn {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-bright);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.save-default-btn {
+    background: rgba(72, 187, 120, 0.15);
+    color: #48BB78;
+    border-color: rgba(72, 187, 120, 0.3);
+}
+
+.save-default-btn:hover {
+    background: rgba(72, 187, 120, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+.load-default-btn {
+    background: rgba(66, 153, 225, 0.15);
+    color: #4299E1;
+    border-color: rgba(66, 153, 225, 0.3);
+}
+
+.load-default-btn:hover {
+    background: rgba(66, 153, 225, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+}
+
+.reset-default-btn {
+    background: rgba(237, 137, 54, 0.15);
+    color: #ED8936;
+    border-color: rgba(237, 137, 54, 0.3);
+}
+
+.reset-default-btn:hover {
+    background: rgba(237, 137, 54, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
+}
+
 .generate-btn.loading .btn-text {
     opacity: 0;
 }

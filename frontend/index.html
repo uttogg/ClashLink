@@ -116,6 +116,30 @@
                                 </div>
                             </div>
                         </details>
+                        
+                        <!-- 默认配置管理 -->
+                        <details class="default-config">
+                            <summary>⚙️ 默认配置管理</summary>
+                            <div class="default-options">
+                                <div class="option-item">
+                                    <label for="defaultConfigName">配置名称</label>
+                                    <input type="text" id="defaultConfigName" value="ClashLink配置" placeholder="输入配置名称">
+                                    <small>设置默认的配置文件名称</small>
+                                </div>
+                                
+                                <div class="option-item">
+                                    <label for="customRules">自定义规则 (可选)</label>
+                                    <textarea id="customRules" placeholder="添加自定义分流规则，每行一个规则&#10;例如:&#10;- DOMAIN-SUFFIX,google.com,🚀 节点选择&#10;- DOMAIN-SUFFIX,github.com,🚀 节点选择&#10;- DOMAIN-SUFFIX,netflix.com,🚀 节点选择"></textarea>
+                                    <small>自定义分流规则，留空使用默认规则</small>
+                                </div>
+                                
+                                <div class="option-actions">
+                                    <button id="saveDefaultConfig" class="save-default-btn">💾 保存为默认</button>
+                                    <button id="loadDefaultConfig" class="load-default-btn">📥 加载默认</button>
+                                    <button id="resetDefaultConfig" class="reset-default-btn">🔄 重置默认</button>
+                                </div>
+                            </div>
+                        </details>
                     </div>
                 </div>
                 
